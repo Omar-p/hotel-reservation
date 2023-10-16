@@ -1,11 +1,20 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"flag"
+	"github.com/gofiber/fiber/v2"
+	"github.com/omar-p/hotel-reservation/api"
+)
 
 func main() {
+	listenAddr := flag.String("listenAdder", ":8080", "port that the server will listen on")
+	flag.Parse()
+
 	app := fiber.New()
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(map[string]string{"msg": "Hello, World 👋!"})
-	})
-	app.Listen(":8080")
+	apiV1 := app.Group("/api/v1")
+
+	apiV1.Get("/users", api.HandleGetUsers)
+	apiV1.Get("/users/:id", api.HandleGetUser)
+
+	app.Listen(*listenAddr)
 }
