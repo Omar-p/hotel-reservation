@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/omar-p/hotel-reservation/db"
 	"github.com/omar-p/hotel-reservation/types"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 type UserHandler struct {
@@ -48,4 +49,21 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(user)
+}
+
+func (h *UserHandler) HandlePutUser(ctx *fiber.Ctx) error {
+	var (
+		reqBody types.UpdateUserRequest
+		userID  = ctx.Params("id")
+	)
+	if err := ctx.BodyParser(&reqBody); err != nil {
+		return err
+	}
+	if errors := reqBody.Validate(); len(errors) > 0 {
+		return ctx.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+	if err := h.userStore.UpdateUser(ctx.Context(), bson.M{"_id": userID}, &reqBody); err != nil {
+		return err
+	}
+	return ctx.SendStatus(fiber.StatusOK)
 }

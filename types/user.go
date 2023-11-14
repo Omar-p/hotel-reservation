@@ -1,6 +1,7 @@
 package types
 
 import (
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 	"regexp"
@@ -20,6 +21,33 @@ type CreateUserRequest struct {
 	Password  string `json:"password"`
 }
 
+type UpdateUserRequest struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+}
+
+func (u UpdateUserRequest) Validate() map[string]string {
+	errors := map[string]string{}
+	if u.FirstName != "" && len(u.FirstName) < minFirstNameLength {
+		errors["firstName"] = "firstName must be at least 2 characters"
+	}
+	if u.LastName != "" && len(u.LastName) < minLastNameLength {
+		errors["lastName"] = "lastName must be at least 2 characters"
+	}
+	return errors
+}
+
+func (u UpdateUserRequest) ToBSON() bson.M {
+	m := bson.M{}
+	if u.FirstName != "" {
+
+		m["firstName"] = u.FirstName
+	}
+	if u.LastName != "" {
+		m["lastName"] = u.LastName
+	}
+	return m
+}
 func (c CreateUserRequest) Validate() map[string]string {
 	errors := map[string]string{}
 	if len(c.FirstName) < minFirstNameLength {

@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"fmt"
 	"github.com/omar-p/hotel-reservation/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -15,6 +16,7 @@ type UserStore interface {
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
+	UpdateUser(context.Context, bson.M, *types.UpdateUserRequest) error
 }
 
 type MongoUserStore struct {
@@ -65,4 +67,18 @@ func (m *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 	}
 
 	return users, nil
+}
+
+func (m *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, updateRequest *types.UpdateUserRequest) error {
+	update := bson.D{
+		{"$set", updateRequest.ToBSON()},
+	}
+	result, err := m.coll.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	if result.MatchedCount == 0 {
+		return fmt.Errorf("no documents matched the filter")
+	}
+	return nil
 }
