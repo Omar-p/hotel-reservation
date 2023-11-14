@@ -17,6 +17,7 @@ type UserStore interface {
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
 	UpdateUser(context.Context, bson.M, *types.UpdateUserRequest) error
+	DeleteUser(context.Context, string) error
 }
 
 type MongoUserStore struct {
@@ -78,6 +79,21 @@ func (m *MongoUserStore) UpdateUser(ctx context.Context, filter bson.M, updateRe
 		return err
 	}
 	if result.MatchedCount == 0 {
+		return fmt.Errorf("no documents matched the filter")
+	}
+	return nil
+}
+
+func (m *MongoUserStore) DeleteUser(ctx context.Context, s string) error {
+	oid, err := primitive.ObjectIDFromHex(s)
+	if err != nil {
+		return err
+	}
+	result, err := m.coll.DeleteOne(ctx, bson.M{"_id": oid})
+	if err != nil {
+		return err
+	}
+	if result.DeletedCount == 0 {
 		return fmt.Errorf("no documents matched the filter")
 	}
 	return nil

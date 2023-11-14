@@ -67,3 +67,11 @@ func (h *UserHandler) HandlePutUser(ctx *fiber.Ctx) error {
 	}
 	return ctx.SendStatus(fiber.StatusOK)
 }
+
+func (h *UserHandler) HandleDeleteUser(ctx *fiber.Ctx) error {
+	userID := ctx.Params("id")
+	if err := h.userStore.DeleteUser(ctx.Context(), userID); err != nil {
+		return err
+	}
+	return ctx.SendStatus(fiber.StatusNoContent)
+}
