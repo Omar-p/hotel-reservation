@@ -14,6 +14,7 @@ var userCollection = os.Getenv("USER_COLLECTION")
 type UserStore interface {
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
+	InsertUser(context.Context, *types.User) (*types.User, error)
 }
 
 type MongoUserStore struct {
@@ -27,6 +28,15 @@ func NewMongoUserStore(c *mongo.Client) *MongoUserStore {
 		coll:   c.Database(dbName).Collection(userCollection),
 	}
 
+}
+
+func (m *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*types.User, error) {
+	result, err := m.coll.InsertOne(ctx, user)
+	if err != nil {
+		return nil, err
+	}
+	user.ID = result.InsertedID.(primitive.ObjectID)
+	return user, nil
 }
 
 func (m *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.User, error) {

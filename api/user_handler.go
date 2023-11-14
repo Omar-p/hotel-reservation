@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gofiber/fiber/v2"
 	"github.com/omar-p/hotel-reservation/db"
+	"github.com/omar-p/hotel-reservation/types"
 )
 
 type UserHandler struct {
@@ -28,4 +29,23 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(userById)
+}
+
+func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
+	var reqBody types.CreateUserRequest
+	if err := c.BodyParser(&reqBody); err != nil {
+		return err
+	}
+	if errors := reqBody.Validate(); len(errors) > 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(errors)
+	}
+	user, err := types.NewUserFromCreateRequest(&reqBody)
+	if err != nil {
+		return err
+	}
+	user, err = h.userStore.InsertUser(context.Background(), user)
+	if err != nil {
+		return err
+	}
+	return c.JSON(user)
 }
