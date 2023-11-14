@@ -17,13 +17,13 @@ func NewUserHandler(store db.UserStore) *UserHandler {
 }
 
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
-	users, _ := h.userStore.GetUsers(context.Background())
+	users, _ := h.userStore.GetUsers(c.Context())
 	return c.JSON(users)
 }
 
 func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 	id := c.Params("id", "")
-	userById, err := h.userStore.GetUserByID(context.Background(), id)
+	userById, err := h.userStore.GetUserByID(c.Context(), id)
 	if err != nil {
 		return err
 	}
