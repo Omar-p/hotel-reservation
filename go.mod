@@ -1,6 +1,6 @@
 module github.com/omar-p/hotel-reservation
 
-go 1.20
+go 1.21.4
 
 require (
 	github.com/gofiber/fiber/v2 v2.50.0
