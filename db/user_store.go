@@ -12,7 +12,12 @@ import (
 
 var userCollection = os.Getenv("USER_COLLECTION")
 
+type Dropper interface {
+	Drop(ctx context.Context) error
+}
+
 type UserStore interface {
+	Dropper
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
@@ -97,4 +102,8 @@ func (m *MongoUserStore) DeleteUser(ctx context.Context, s string) error {
 		return fmt.Errorf("no documents matched the filter")
 	}
 	return nil
+}
+
+func (m *MongoUserStore) Drop(ctx context.Context) error {
+	return m.coll.Drop(ctx)
 }
