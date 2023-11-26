@@ -12,7 +12,8 @@ import (
 )
 
 var (
-	dbUri = os.Getenv("DB_URI")
+	dbUri  = os.Getenv("DB_URI")
+	dbName = os.Getenv("DB_NAME")
 )
 
 var config = fiber.Config{
@@ -43,7 +44,7 @@ func main() {
 	}()
 
 	// handlers initialization
-	userHandler := api.NewUserHandler(db.NewMongoUserStore(client))
+	userHandler := api.NewUserHandler(db.NewMongoUserStore(client, dbName))
 
 	app := fiber.New(config)
 	apiV1 := app.Group("/api/v1")
